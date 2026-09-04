@@ -1,0 +1,16 @@
+[package]
+name = "irealegui"
+version = "0.1.0"
+edition = "2021"
+description = "irealstudio — a11y smoke-прототип на Rust + egui (меню, плейлист, чарт)"
+license = "MIT"
+
+[dependencies]
+# Версия зафиксирована жёстко: API проверен под 0.27.2.
+# accesskit включён по умолчанию в eframe, но указан явно — это и есть
+# мост к NVDA на Windows (accesskit -> UIA).
+eframe = { version = "=0.27.2", features = ["accesskit"] }
+
+# Быстрее собрать в debug и не тормозить в release.
+[profile.dev]
+opt-level = 1
