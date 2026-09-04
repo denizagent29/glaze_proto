@@ -168,14 +168,28 @@ func main() {
 				_ = ev.Emit("tts", chartForSpeech)
 			}},
 			{Separator: true},
-			// Бисект NVDA-тормозов: тормозит ли Alt-меню на пустой странице?
+			// Бисект NVDA-тормозов: пустая страница уже показала, что связка
+			// «меню+WebView2» чистая — фризит содержимое. Теперь изолируем, ЧТО
+			// именно: голый текст чарта, строка статуса (aria-live), кнопки.
 			{Title: "Тест: пустая страница (проверка Alt-меню)", OnClick: func() {
 				w.Navigate("about:blank")
 				u.status("Пустая страница. Жми Alt и засеки, виснет ли меню.")
 			}},
-			{Title: "Тест: показать чарт", OnClick: func() {
+			{Title: "Тест: 1 — голый чарт (текст, без JS/кнопок/статуса)", OnClick: func() {
+				w.SetHtml(pageBare)
+				u.status("Голый чарт, без интерактива. Жми Alt.")
+			}},
+			{Title: "Тест: 2 — голый чарт + строка статуса (aria-live)", OnClick: func() {
+				w.SetHtml(pageLive)
+				u.status("Голый чарт + aria-live строка. Жми Alt.")
+			}},
+			{Title: "Тест: 3 — голый чарт + кнопки", OnClick: func() {
+				w.SetHtml(pageButtons)
+				u.status("Голый чарт + кнопки. Жми Alt.")
+			}},
+			{Title: "Тест: 4 — полная страница (контроль)", OnClick: func() {
 				w.SetHtml(pageHTML)
-				u.status("Чарт снова загружен.")
+				u.status("Полная страница (как была). Жми Alt.")
 			}},
 		}},
 		{Title: "Демо", Submenu: []menu.Item{
@@ -208,6 +222,67 @@ const chartForSpeech = "Ритм Чейнджес, ми-бемоль мажор,
 	"Куплет А: ми-бемоль-шесть два такта, ми-бемоль-септ два такта, " +
 	"ля-бемоль-септ два такта, ми-бемоль-шесть, и в конце оборот фа-минор-септ, си-бемоль-септ. " +
 	"Бридж Б: соль-септ, соль-септ, до-септ, до-септ, фа-септ, фа-септ, си-бемоль-септ два такта."
+
+// Тест-страницы бисекта NVDA. Без CSS — для a11y важна семантика, не вид.
+// Разница только в добавляемых кусках, чтобы изолировать виновника фриза.
+
+// pageBare — голый чарт: заголовок и текст аккордов, ничего интерактивного,
+// ни одной aria-live-строки, ноль JS.
+const pageBare = `<!doctype html>
+<html lang="ru">
+<head><meta charset="utf-8"><title>irealstudio bare chart</title></head>
+<body>
+  <h1>Rhythm Changes</h1>
+  <p>ми-бемоль мажор, свинг, 200 ударов в минуту</p>
+  <div>A</div>
+  <span>Eb6 Eb6 Eb7 Eb7 Ab7 Ab7 Eb6 Fm7 Bb7</span>
+  <div>A</div>
+  <span>Eb6 Eb6 Eb7 Eb7 Ab7 Ab7 Eb6 Fm7 Bb7</span>
+  <div>B</div>
+  <span>G7 G7 C7 C7 F7 F7 Bb7 Bb7</span>
+  <div>A</div>
+  <span>Eb6 Eb6 Eb7 Eb7 Ab7 Ab7 Fm7 Bb7 Eb6</span>
+</body>
+</html>`
+
+// pageLive — голый чарт + одна aria-live-строка статуса (как в полной).
+const pageLive = `<!doctype html>
+<html lang="ru">
+<head><meta charset="utf-8"><title>irealstudio bare + status</title></head>
+<body>
+  <h1>Rhythm Changes</h1>
+  <p>ми-бемоль мажор, свинг, 200 ударов в минуту</p>
+  <div>A</div>
+  <span>Eb6 Eb6 Eb7 Eb7 Ab7 Ab7 Eb6 Fm7 Bb7</span>
+  <div>A</div>
+  <span>Eb6 Eb6 Eb7 Eb7 Ab7 Ab7 Eb6 Fm7 Bb7</span>
+  <div>B</div>
+  <span>G7 G7 C7 C7 F7 F7 Bb7 Bb7</span>
+  <div>A</div>
+  <span>Eb6 Eb6 Eb7 Eb7 Ab7 Ab7 Fm7 Bb7 Eb6</span>
+  <output id="status" aria-live="polite" role="status">Готово.</output>
+</body>
+</html>`
+
+// pageButtons — голый чарт + две кнопки (фокус-цели для Tab), без JS.
+const pageButtons = `<!doctype html>
+<html lang="ru">
+<head><meta charset="utf-8"><title>irealstudio bare + buttons</title></head>
+<body>
+  <h1>Rhythm Changes</h1>
+  <p>ми-бемоль мажор, свинг, 200 ударов в минуту</p>
+  <div>A</div>
+  <span>Eb6 Eb6 Eb7 Eb7 Ab7 Ab7 Eb6 Fm7 Bb7</span>
+  <div>A</div>
+  <span>Eb6 Eb6 Eb7 Eb7 Ab7 Ab7 Eb6 Fm7 Bb7</span>
+  <div>B</div>
+  <span>G7 G7 C7 C7 F7 F7 Bb7 Bb7</span>
+  <div>A</div>
+  <span>Eb6 Eb6 Eb7 Eb7 Ab7 Ab7 Fm7 Bb7 Eb6</span>
+  <button type="button">Позвать Go</button>
+  <button type="button">Открыть файл</button>
+</body>
+</html>`
 
 // pageHTML — тело приложения. Чарт — настоящий DOM (текст), не canvas, чтобы
 // NVDA читал аккорды; статусная строка aria-live объявляет события из меню.
