@@ -1,0 +1,12 @@
+[package]
+name = "irealwx"
+version = "0.1.0"
+edition = "2021"
+description = "irealstudio — a11y smoke-прототип на Rust + wxDragon (настоящее нативное меню)"
+
+[dependencies]
+wxdragon = "=0.9.21"
+
+# Ускоряет дебаг-сборку; release-сборка и так оптимизирована.
+[profile.dev]
+opt-level = 1
