@@ -167,6 +167,16 @@ func main() {
 			{Title: "Озвучить чарт", Shortcut: "ctrl+t", OnClick: func() {
 				_ = ev.Emit("tts", chartForSpeech)
 			}},
+			{Separator: true},
+			// Бисект NVDA-тормозов: тормозит ли Alt-меню на пустой странице?
+			{Title: "Тест: пустая страница (проверка Alt-меню)", OnClick: func() {
+				w.Navigate("about:blank")
+				u.status("Пустая страница. Жми Alt и засеки, виснет ли меню.")
+			}},
+			{Title: "Тест: показать чарт", OnClick: func() {
+				w.SetHtml(pageHTML)
+				u.status("Чарт снова загружен.")
+			}},
 		}},
 		{Title: "Демо", Submenu: []menu.Item{
 			{Title: "w.Eval в страницу", OnClick: func() {
